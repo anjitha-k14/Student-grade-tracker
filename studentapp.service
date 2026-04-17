@@ -1,0 +1,13 @@
+[Unit]
+Description=Student Grade Tracker Flask App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/student-app
+Environment="PATH=/home/ubuntu/student-app/venv/bin"
+ExecStart=/home/ubuntu/student-app/venv/bin/gunicorn -c gunicorn.conf.py app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

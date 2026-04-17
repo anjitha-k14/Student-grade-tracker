@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Grade Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0575E6, #00F260);
+            background-attachment: fixed;
+            color: #2d3748;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        header a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: underline;
+            margin-left: 10px;
+        }
+
+        main {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto 3rem auto;
+            padding: 0 1.5rem;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* Responsive Media Queries */
+        /* Laptops/Tablets */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* Mobile Devices */
+        @media (max-width: 767px) {
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 2.2rem;
+            }
+
+            form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            form input, form button {
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Small Phones */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            header p {
+                font-size: 0.95rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        .content-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: #1a365d;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        .card h2::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 4px;
+            background: #e73c7e;
+            bottom: -6px;
+            left: 0;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .card:hover h2::after {
+            width: 100%;
+        }
+
+        form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        form input {
+            flex: 1;
+            min-width: 180px;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #edf2f7;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            color: #2d3748;
+        }
+
+        form input::placeholder {
+            color: #a0aec0;
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: #23a6d5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(35, 166, 213, 0.15);
+        }
+
+        form button {
+            background: linear-gradient(135deg, #23a6d5, #23d5ab);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(35, 166, 213, 0.3);
+        }
+
+        form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(35, 166, 213, 0.4);
+            background: linear-gradient(135deg, #1d8eb8, #1eb895);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat .num {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e73c7e, #ee7752);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat .label {
+            font-size: 0.80rem;
+            color: #4a5568;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(35, 166, 213, 0.08);
+            color: #2b6cb0;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        th:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        td {
+            border-bottom: 1px solid #edf2f7;
+            color: #4a5568;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f7fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.8em;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .badge.A {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge.B {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+
+        .badge.C {
+            background: #fefcbf;
+            color: #744210;
+        }
+
+        .badge.F {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        a.del {
+            color: #e53e3e;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background: #fff5f5;
+            display: inline-block;
+        }
+
+        a.del:hover {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .empty {
+            text-align: center;
+            color: #718096;
+            padding: 2rem 1rem;
+            font-style: italic;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Student Grade Tracker</h1>
+        <p>Welcome, {{ username }}! | <a href="/logout">Logout</a></p>
+    </header>
+    <main>
+        <div class="content-left">
+            <div class="stats">
+                <div class="stat">
+                    <div class="num">{{ total }}</div>
+                    <div class="label">Total Students</div>
+                </div>
+                <div class="stat">
+                    <div class="num">{{ avg }}</div>
+                    <div class="label">Avg Grade</div>
+                </div>
+                <div class="stat">
+                    <div class="num">{{ passed }}</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="stat">
+                    <div class="num">{{ failed }}</div>
+                    <div class="label">Failed</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Add Student</h2>
+                <form action="/add" method="POST">
+                    <input name="name" placeholder="Student Name" required />
+                    <input name="subject" placeholder="Subject" required />
+                    <input name="grade" type="number" min="0" max="100" placeholder="Grade (0-100)" required />
+                    <button type="submit">Add</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Student Records</h2>
+                {% if students %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Grade</th>
+                            <th>Letter</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                        {% set letter = 'A' if s.grade >= 80 else ('B' if s.grade >= 60 else ('C' if s.grade >= 40 else
+                        'F')) %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ s.name }}</td>
+                            <td>{{ s.subject }}</td>
+                            <td>{{ s.grade }}%</td>
+                            <td><span class="badge {{ letter }}">{{ letter }}</span></td>
+                            <td><a class="del" href="/delete/{{ s.id }}">Delete</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="empty">No students yet. Add one above!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <aside class="content-right">
+            <div class="card">
+                <h2>Grade Analytics</h2>
+                <div class="chart-container">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+
+                <h2 style="margin-top: 2rem; font-size: 1.4rem; color: #1a365d; font-weight: 600;">Pass / Fail Ratio
+                </h2>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="passFailChart"></canvas>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const passedCount = {{ passed }};
+        const failedCount = {{ failed }};
+        const students = {{ students | tojson | safe if students else '[]' }};
+
+        // Prepare data
+        let grades = { A: 0, B: 0, C: 0, F: 0 };
+        students.forEach(s => {
+            if (s.grade >= 80) grades.A++;
+            else if (s.grade >= 60) grades.B++;
+            else if (s.grade >= 40) grades.C++;
+            else grades.F++;
+        });
+
+        // Initialize Grade Distribution Chart
+        let ctxGrade = document.getElementById('gradeChart');
+        if (ctxGrade) {
+            new Chart(ctxGrade.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['A', 'B', 'C', 'F'],
+                    datasets: [{
+                        label: 'Students',
+                        data: [grades.A, grades.B, grades.C, grades.F],
+                        backgroundColor: [
+                            'rgba(34, 84, 61, 0.7)',
+                            'rgba(42, 67, 101, 0.7)',
+                            'rgba(116, 66, 16, 0.7)',
+                            'rgba(116, 42, 42, 0.7)'
+                        ],
+                        borderColor: [
+                            '#22543d', '#2a4365', '#744210', '#742a2a'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Initialize Pass/Fail Ring Chart
+        let ctxPassFail = document.getElementById('passFailChart');
+        if (ctxPassFail) {
+            new Chart(ctxPassFail.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Failed'],
+                    datasets: [{
+                        data: [passedCount, failedCount],
+                        backgroundColor: ['#23d5ab', '#e73c7e'],
+                        borderWidth: 1,
+                        borderColor: '#fff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    cutout: '70%'
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
