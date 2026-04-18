@@ -357,6 +357,37 @@
             color: #c53030;
         }
 
+        a.edit-btn {
+            color: #2b6cb0;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background: #ebf8ff;
+            display: inline-block;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        a.edit-btn:hover {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        form button.cancel-btn {
+            background: #e2e8f0;
+            color: #4a5568;
+            box-shadow: none;
+        }
+
+        form button.cancel-btn:hover {
+            background: #cbd5e0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
         .empty {
             text-align: center;
             color: #718096;
@@ -401,7 +432,7 @@
 
             <div class="card">
                 <h2>Add Student</h2>
-                <form action="/add" method="POST">
+                <form id="student-form" action="/add" method="POST">
                     <input name="name" placeholder="Student Name" required />
                     <input name="subject" placeholder="Subject" required />
                     <input name="grade" type="number" min="0" max="100" placeholder="Grade (0-100)" required />
@@ -433,7 +464,10 @@
                             <td>{{ s.subject }}</td>
                             <td>{{ s.grade }}%</td>
                             <td><span class="badge {{ letter }}">{{ letter }}</span></td>
-                            <td><a class="del" href="/delete/{{ s.id }}">Delete</a></td>
+                            <td>
+                                <a class="edit-btn" onclick="editStudent({{ s.id }}, '{{ s.name|replace('\'', '\\\'') }}', '{{ s.subject|replace('\'', '\\\'') }}', {{ s.grade }})">Edit</a>
+                                <a class="del" href="/delete/{{ s.id }}">Delete</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -528,6 +562,37 @@
                     cutout: '70%'
                 }
             });
+        }
+
+        function editStudent(id, name, subject, grade) {
+            document.querySelector('#student-form input[name="name"]').value = name;
+            document.querySelector('#student-form input[name="subject"]').value = subject;
+            document.querySelector('#student-form input[name="grade"]').value = grade;
+            
+            const form = document.getElementById('student-form');
+            form.action = '/edit/' + id;
+            
+            const btn = form.querySelector('button[type="submit"]');
+            btn.textContent = 'Update';
+            
+            document.querySelector('.card h2').textContent = 'Edit Student';
+            
+            if(!document.querySelector('.cancel-btn')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.className = 'cancel-btn';
+                cancelBtn.onclick = function() {
+                    document.querySelector('#student-form input[name="name"]').value = '';
+                    document.querySelector('#student-form input[name="subject"]').value = '';
+                    document.querySelector('#student-form input[name="grade"]').value = '';
+                    form.action = '/add';
+                    btn.textContent = 'Add';
+                    document.querySelector('.card h2').textContent = 'Add Student';
+                    cancelBtn.remove();
+                };
+                form.appendChild(cancelBtn);
+            }
         }
     </script>
 </body>

@@ -113,6 +113,24 @@ def delete_student(student_id):
     cur.close()
     return redirect(url_for("index"))
 
+@app.route("/edit/<int:student_id>", methods=["POST"])
+@login_required
+def edit_student(student_id):
+    name    = request.form.get("name", "").strip()
+    subject = request.form.get("subject", "").strip()
+    grade   = request.form.get("grade", "").strip()
+    user_id = session.get("user_id")
+    
+    if name and subject and grade:
+        cur = mysql.connection.cursor()
+        cur.execute(
+            "UPDATE students SET name=%s, subject=%s, grade=%s WHERE id=%s AND user_id=%s",
+            (name, subject, int(grade), student_id, user_id)
+        )
+        mysql.connection.commit()
+        cur.close()
+    return redirect(url_for("index"))
+
 @app.route("/api/students")
 @login_required
 def api_students():

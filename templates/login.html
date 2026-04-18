@@ -173,11 +173,27 @@
 
         <form action="/login" method="POST">
             <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <div style="position: relative; width: 100%;">
+                <input type="password" name="password" id="password" placeholder="Password" style="width: 100%;" required>
+                <span onclick="togglePassword()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 0.9em; color: #4a5568; font-weight: 600; user-select: none;">Show</span>
+            </div>
             <button type="submit">Log In</button>
         </form>
 
         <a href="/register" class="toggle-link">Don't have an account? Register here</a>
     </div>
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const span = document.querySelector('span[onclick="togglePassword()"]');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                span.textContent = 'Hide';
+            } else {
+                pwd.type = 'password';
+                span.textContent = 'Show';
+            }
+        }
+    </script>
 </body>
 </html>
